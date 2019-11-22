@@ -1,6 +1,8 @@
 /content/documents/createlandingpage:
+  .meta:order-before: administration
   jcr:primaryType: hippostd:folder
   jcr:mixinTypes: ['hippo:named', 'hippotranslation:translated', 'mix:referenceable']
+  jcr:uuid: a72bae45-35bf-4e00-aea5-658105dee4ae
   hippo:name: Create Landing Page
   hippostd:foldertype: [new-translated-folder, new-document]
   hippotranslation:id: 996bcac5-86cf-49b5-a7a3-16a74863e814

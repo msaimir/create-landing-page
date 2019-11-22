@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project>
-  <projectNamespace>createlandingpage</projectNamespace>
+  <applicationSubModule>application</applicationSubModule>
+  <cmsDependenciesModule>cms-dependencies</cmsDependenciesModule>
+  <cmsModule>cms</cmsModule>
   <confirmParams>false</confirmParams>
-  <selectedProjectPackage>org.onehippo</selectedProjectPackage>
+  <developmentSubModule>development</developmentSubModule>
+  <enterprise>false</enterprise>
+  <extraTemplates>true</extraTemplates>
+  <hstRoot>/hst:createlandingpage</hstRoot>
+  <projectNamespace>createlandingpage</projectNamespace>
+  <repositoryDataModule>repository-data</repositoryDataModule>
   <selectedBeansPackage>org.onehippo.beans</selectedBeansPackage>
   <selectedComponentsPackage>org.onehippo.components</selectedComponentsPackage>
+  <selectedProjectPackage>org.onehippo</selectedProjectPackage>
   <selectedRestPackage>org.onehippo.rest</selectedRestPackage>
-  <hstRoot>/hst:createlandingpage</hstRoot>
-  <webfileBundleName>site</webfileBundleName>
-  <setupDone>false</setupDone>
+  <setupDone>true</setupDone>
+  <siteContextPath>/site</siteContextPath>
+  <siteModule>site</siteModule>
   <useSamples>true</useSamples>
-  <extraTemplates>true</extraTemplates>
+  <webfileBundleName>site</webfileBundleName>
+  <webfilesSubModule>webfiles</webfilesSubModule>
 </project>
