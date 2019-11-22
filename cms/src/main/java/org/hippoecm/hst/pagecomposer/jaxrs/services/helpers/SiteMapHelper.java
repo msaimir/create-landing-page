@@ -60,6 +60,7 @@ import static org.hippoecm.hst.configuration.HstNodeTypes.PROTOTYPE_META_PROPERT
 import static org.hippoecm.hst.configuration.HstNodeTypes.SITEMAPITEM_PROPERTY_APPLICATION_ID;
 import static org.hippoecm.hst.configuration.HstNodeTypes.SITEMAPITEM_PROPERTY_COMPONENTCONFIGURATIONID;
 import static org.hippoecm.hst.configuration.HstNodeTypes.SITEMAPITEM_PROPERTY_REF_ID;
+import static org.hippoecm.hst.configuration.HstNodeTypes.SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH;
 import static org.hippoecm.hst.pagecomposer.jaxrs.services.exceptions.ClientError.INVALID_MOVE_TO_SELF_OR_DESCENDANT;
 
 public class SiteMapHelper extends AbstractHelper {
@@ -251,6 +252,102 @@ public class SiteMapHelper extends AbstractHelper {
 
         return newSitemapNode;
     }
+
+    public PageCopyContextImpl detach(final String mountId, final String sourceSiteMapItemUUID, final String targetSiteMapItemUUID, final String targetName)
+            throws RepositoryException {
+
+        HstRequestContext requestContext = pageComposerContextService.getRequestContext();
+
+        final Mount editingMount = pageComposerContextService.getEditingMount();
+        final HstSiteMapItem sourceSiteMapItem = validateAndReturnSiteMapItem(sourceSiteMapItemUUID, editingMount);
+        final Mount targetMount;
+        if (mountId == null) {
+            targetMount = editingMount;
+        } else {
+            targetMount = getPlatformServices().getMountService().getPreviewMounts(requestContext.getVirtualHost().getHostGroupName()).get(mountId);
+            if (targetMount == null) {
+                throw new IllegalArgumentException(String.format("Cannot find target mount for id '%s'", mountId));
+            }
+        }
+
+        final String previewWorkspaceSiteMapPath = getWorkspacePath(targetMount) + "/" + NODENAME_HST_SITEMAP;
+
+        final Session session = requestContext.getSession();
+        if (!session.nodeExists(previewWorkspaceSiteMapPath)) {
+            createWorkspaceSiteMapInPreviewAndLive(previewWorkspaceSiteMapPath, session);
+        }
+
+        final HstSiteMapItem targetSiteMapItem;
+        if (targetSiteMapItemUUID != null) {
+            targetSiteMapItem = validateAndReturnSiteMapItem(targetSiteMapItemUUID, targetMount);
+        } else {
+            targetSiteMapItem = null;
+        }
+
+        final Node workspaceSiteMapNode = session.getNode(previewWorkspaceSiteMapPath);
+
+        String[] targetPathTokens = StringUtils.split(targetName, "/");
+        final String relativeContentPath = StringUtils.removeEnd(StringUtils.removeStart(targetName, "/"), ".html");
+
+        final String encodedName = getURLDecodedJcrEncodedName(targetPathTokens[targetPathTokens.length - 1]);
+        final String target;
+        if (targetSiteMapItemUUID != null) {
+            target = session.getNodeByIdentifier(targetSiteMapItemUUID).getPath() + "/" + encodedName;
+        } else {
+            target = workspaceSiteMapNode.getPath() + "/" + encodedName;
+        }
+        String nonWorkspaceLocation = target.replace("/" + NODENAME_HST_WORKSPACE + "/", "/");
+
+        if (session.nodeExists(target) || session.nodeExists(nonWorkspaceLocation)) {
+            String message = String.format("Cannot copy because there is a siteMapItem with same name and " +
+                    "location already located at '%s' or '%s'.", target, nonWorkspaceLocation);
+            throw new ClientException(message, ClientError.ITEM_CANNOT_BE_CLONED, Collections.singletonMap("errorReason", message));
+        }
+
+        validateTarget(session, target, targetMount.getHstSite().getSiteMap());
+        final Node newSiteMapNode = shallowCopy(session, sourceSiteMapItemUUID, substringBeforeLast(target, "/"), encodedName);
+        newSiteMapNode.setProperty(SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH, relativeContentPath);
+        lockHelper.acquireLock(newSiteMapNode, 0);
+
+        // copy the page definition
+        // we need to find the page node uuid to copy through hstSiteMapItem.getComponentConfigurationId() which is NOT
+        // the page UUID
+        final HstComponentConfiguration sourcePage = pageComposerContextService.getEditingPreviewSite().getComponentsConfiguration()
+                .getComponentConfiguration(sourceSiteMapItem.getComponentConfigurationId());
+
+        if (sourcePage == null) {
+            final String message = "Cannot duplicate page since backing hst component configuration object not found";
+            throw new ClientException(message,
+                    ClientError.ITEM_CANNOT_BE_CLONED, Collections.singletonMap("errorReason", message));
+        }
+
+        String sourcePathInfo = HstSiteMapUtils.getPath(sourceSiteMapItem);
+        String sourcePageNodeNamePrefix = sourcePathInfo.replace("/", "-");
+
+        final String prefix = getPreviewConfigurationPath() + "/" + NODENAME_HST_PAGES + "/" + sourcePageNodeNamePrefix + "-";
+        String targetPageName;
+        if (sourcePage.getCanonicalStoredLocation().startsWith(prefix)) {
+            targetPageName = encodedName + "-" + sourcePage.getCanonicalStoredLocation().substring(prefix.length());
+        } else {
+            targetPageName = encodedName;
+        }
+        if (targetSiteMapItem != null) {
+            String targetPathInfo = HstSiteMapUtils.getPath(targetSiteMapItem);
+            targetPageName = targetPathInfo.replace("/", "-") + "-" + targetPageName;
+        }
+
+        Node clonedPage = pagesHelper.copy(session, targetPageName, sourcePage, editingMount, targetMount);
+        newSiteMapNode.setProperty(SITEMAPITEM_PROPERTY_COMPONENTCONFIGURATIONID,
+                NODENAME_HST_PAGES + "/" + clonedPage.getName());
+
+        PageCopyContextImpl pcc = new PageCopyContextImpl(requestContext, editingMount, sourceSiteMapItem, session.getNodeByIdentifier(sourceSiteMapItemUUID),
+                sourcePage, session.getNodeByIdentifier(sourcePage.getCanonicalIdentifier()), targetMount, targetSiteMapItem, newSiteMapNode, clonedPage);
+
+        templateHelper.copyTemplates(pcc);
+        return pcc;
+    }
+
+
 
     /**
      * utility method to create a <strong>shallow copy</strong> of {@code siteMapItemId} : Shallow copy means that child
@@ -485,15 +582,15 @@ public class SiteMapHelper extends AbstractHelper {
             final String absPath = siteMapItem.getPrimaryDocumentRepresentation().getPath();
             final String rootContentPath = pageComposerContextService.getEditingMount().getContentPath();
             if (absPath.startsWith(rootContentPath + "/")) {
-                setProperty(jcrNode, HstNodeTypes.SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH, absPath.substring(rootContentPath.length() + 1));
+                setProperty(jcrNode, SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH, absPath.substring(rootContentPath.length() + 1));
             } else if (absPath.equals("")) {
-                removeProperty(jcrNode, HstNodeTypes.SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH);
+                removeProperty(jcrNode, SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH);
             } else {
                 log.info("Cannot set '{}' for relative content path because does not start with root channel content path '{}'",
                         absPath, rootContentPath + "/");
             }
         } else if (siteMapItem.getRelativeContentPath() != null) {
-            setProperty(jcrNode, HstNodeTypes.SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH, siteMapItem.getRelativeContentPath());
+            setProperty(jcrNode, SITEMAPITEM_PROPERTY_RELATIVECONTENTPATH, siteMapItem.getRelativeContentPath());
         }
 
         if (siteMapItem.getPageTitle() != null) {

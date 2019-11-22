@@ -291,23 +291,23 @@ public class SiteMapResource extends AbstractConfigResource {
         HstSiteMap siteMap = siteMapItem.getHstSiteMap();
 
 
-        final ValidatorBuilder preValidators = ValidatorBuilder.builder()
-                .add(validatorFactory.getNotNullValidator(targetName,
-                        ClientError.INVALID_NAME, "Name of the copied page is not allowed to be null"))
-                .add(validatorFactory.getHasPreviewConfigurationValidator(getPageComposerContextService()))
-                .add(validatorFactory.getNodePathPrefixValidator(getPreviewConfigurationPath(), getPageComposerContextService().getRequestConfigIdentifier(),
-                        HstNodeTypes.NODETYPE_HST_SITEMAP))
-                .add(validatorFactory.getNameValidator(targetName))
-                .add(validatorFactory.getNamePathInfoValidator(getPageComposerContextService(), targetName))
-                .add(validatorFactory.getConfigurationExistsValidator(siteMapItemUUID, siteMapHelper));
+//        final ValidatorBuilder preValidators = ValidatorBuilder.builder()
+//                .add(validatorFactory.getNotNullValidator(targetName,
+//                        ClientError.INVALID_NAME, "Name of the copied page is not allowed to be null"))
+//                .add(validatorFactory.getHasPreviewConfigurationValidator(getPageComposerContextService()))
+//                .add(validatorFactory.getNodePathPrefixValidator(getPreviewConfigurationPath(), getPageComposerContextService().getRequestConfigIdentifier(),
+//                        HstNodeTypes.NODETYPE_HST_SITEMAP))
+//                .add(validatorFactory.getNameValidator(targetName))
+//                .add(validatorFactory.getNamePathInfoValidator(getPageComposerContextService(), targetName))
+//                .add(validatorFactory.getConfigurationExistsValidator(siteMapItemUUID, siteMapHelper));
 
         return tryExecute(() -> {
-            PageCopyContextImpl pcc = siteMapHelper.copy(null, siteMapItemUUID, null, targetName);
+            PageCopyContextImpl pcc = siteMapHelper.detach(null, siteMapItemUUID, null, targetName);
             BaseChannelEvent event = new PageCopyEventImpl(getPageComposerContextService().getEditingPreviewChannel(), pcc);
             publishSynchronousEvent(event);
             final SiteMapPageRepresentation siteMapPageRepresentation = createSiteMapPageRepresentation(pcc.getTargetMount(), pcc.getNewSiteMapItemNode().getIdentifier(), null);
             return ok("Item created successfully", siteMapPageRepresentation);
-        }, preValidators.build());
+        }, ValidatorBuilder.builder().build());
     }
 
 
