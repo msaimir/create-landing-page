@@ -1,0 +1,6 @@
+definitions:
+  config:
+    /hst:hst/hst:configurations/createlandingpage/hst:catalog:
+      jcr:primaryType: hst:catalog
+      /createlandingpage-catalog:
+        jcr:primaryType: hst:containeritempackage

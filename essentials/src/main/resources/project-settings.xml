@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project>
+  <projectNamespace>createlandingpage</projectNamespace>
+  <confirmParams>false</confirmParams>
+  <selectedProjectPackage>org.onehippo</selectedProjectPackage>
+  <selectedBeansPackage>org.onehippo.beans</selectedBeansPackage>
+  <selectedComponentsPackage>org.onehippo.components</selectedComponentsPackage>
+  <selectedRestPackage>org.onehippo.rest</selectedRestPackage>
+  <hstRoot>/hst:createlandingpage</hstRoot>
+  <webfileBundleName>site</webfileBundleName>
+  <setupDone>false</setupDone>
+  <useSamples>true</useSamples>
+  <extraTemplates>true</extraTemplates>
+</project>

@@ -1,0 +1,5 @@
+definitions:
+  namespace:
+    createlandingpage:
+      uri: http://www.createlandingpage.com/createlandingpage/nt/1.0
+      cnd: namespaces/create-landing-page.cnd

@@ -1,0 +1,6 @@
+group: 
+  name: create-landing-page
+  after: hippo-cms
+project: create-landing-page
+module:
+  name: create-landing-page-repository-data-site
