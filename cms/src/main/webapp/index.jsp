@@ -16,11 +16,15 @@
 
     <button id="refreshChannel">Refresh Channel</button>
     <button id="refreshPage">Refresh Page</button>
+    <button id="createLandingPage">Create Landing Page</button>
 
     UI properties:
     <pre id="ui"></pre>
 
     Page properties:
     <pre id="page"></pre>
+
+    All properties:
+    <pre id="allui"></pre>
   </body>
 </html>

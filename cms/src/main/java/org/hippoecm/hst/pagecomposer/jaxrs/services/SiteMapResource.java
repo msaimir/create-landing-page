@@ -282,20 +282,34 @@ public class SiteMapResource extends AbstractConfigResource {
     @POST
     @Path("/detach")
     public Response detach(
-            @HeaderParam("mountId") final String mountId,
             @HeaderParam("siteMapItemUUID") final String siteMapItemUUID,
-            @HeaderParam("targetSiteMapItemUUID") final String targetSiteMapItemUUID,
             @HeaderParam("targetName") final String targetName) {
 
+        HstSiteMapItem siteMapItem = siteMapHelper.getConfigObject(siteMapItemUUID);
+        String targetRelativeContentPath = StringUtils.removeEnd(targetName, ".html");
+
+        HstSiteMap siteMap = siteMapItem.getHstSiteMap();
+
+
+        final ValidatorBuilder preValidators = ValidatorBuilder.builder()
+                .add(validatorFactory.getNotNullValidator(targetName,
+                        ClientError.INVALID_NAME, "Name of the copied page is not allowed to be null"))
+                .add(validatorFactory.getHasPreviewConfigurationValidator(getPageComposerContextService()))
+                .add(validatorFactory.getNodePathPrefixValidator(getPreviewConfigurationPath(), getPageComposerContextService().getRequestConfigIdentifier(),
+                        HstNodeTypes.NODETYPE_HST_SITEMAP))
+                .add(validatorFactory.getNameValidator(targetName))
+                .add(validatorFactory.getNamePathInfoValidator(getPageComposerContextService(), targetName))
+                .add(validatorFactory.getConfigurationExistsValidator(siteMapItemUUID, siteMapHelper));
+
         return tryExecute(() -> {
-            PageCopyContextImpl pcc = siteMapHelper.copy(mountId, siteMapItemUUID,
-                    targetSiteMapItemUUID, targetName);
+            PageCopyContextImpl pcc = siteMapHelper.copy(null, siteMapItemUUID, null, targetName);
             BaseChannelEvent event = new PageCopyEventImpl(getPageComposerContextService().getEditingPreviewChannel(), pcc);
             publishSynchronousEvent(event);
             final SiteMapPageRepresentation siteMapPageRepresentation = createSiteMapPageRepresentation(pcc.getTargetMount(), pcc.getNewSiteMapItemNode().getIdentifier(), null);
             return ok("Item created successfully", siteMapPageRepresentation);
-        }, ValidatorBuilder.builder().build());
+        }, preValidators.build());
     }
+
 
     @POST
     @Path("/copy")
