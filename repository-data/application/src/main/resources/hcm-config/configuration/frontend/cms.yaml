@@ -1,0 +1,7 @@
+definitions:
+  config:
+    /hippo:configuration/hippo:frontend/cms/ui-extensions/createLandingPage:
+      jcr:primaryType: frontend:uiExtension
+      frontend:displayName: Create Landing Page
+      frontend:extensionPoint: channel.page.tools
+      frontend:url: /index.jsp
