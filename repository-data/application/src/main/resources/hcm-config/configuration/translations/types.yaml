@@ -1,0 +1,32 @@
+definitions:
+  config:
+    /hippo:configuration/hippo:translations/hippo:types/createlandingpage:contentdocument:
+      jcr:primaryType: hipposys:resourcebundles
+      /en:
+        jcr:primaryType: hipposys:resourcebundle
+        createlandingpage:content: Content
+        createlandingpage:introduction: Introduction
+        createlandingpage:publicationdate: Publication date
+        createlandingpage:title: Title
+        jcr:name: Simple Document
+      /nl:
+        jcr:primaryType: hipposys:resourcebundle
+        createlandingpage:content: Inhoud
+        createlandingpage:introduction: Introductie
+        createlandingpage:publicationdate: Publicatiedatum
+        createlandingpage:title: Titel
+        jcr:name: Eenvoudig Document
+      /fr:
+        jcr:primaryType: hipposys:resourcebundle
+        createlandingpage:content: Contenu
+        createlandingpage:introduction: Introduction
+        createlandingpage:publicationdate: Date de publication
+        createlandingpage:title: Titre
+        jcr:name: Document simple
+      /de:
+        jcr:primaryType: hipposys:resourcebundle
+        createlandingpage:content: Inhalt
+        createlandingpage:introduction: Einführung
+        createlandingpage:publicationdate: Publikationsdatum
+        createlandingpage:title: Titel
+        jcr:name: Einfaches Dokument

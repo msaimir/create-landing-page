@@ -3,3 +3,4 @@ definitions:
     /hippo:namespaces/createlandingpage:
       jcr:primaryType: hipposysedit:namespace
       jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: b63185ff-cbb9-4a99-b31f-72b3691e77f0

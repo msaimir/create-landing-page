@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project>
-  <applicationSubModule>application</applicationSubModule>
-  <cmsDependenciesModule>cms-dependencies</cmsDependenciesModule>
-  <cmsModule>cms</cmsModule>
-  <confirmParams>false</confirmParams>
-  <developmentSubModule>development</developmentSubModule>
-  <enterprise>false</enterprise>
-  <extraTemplates>true</extraTemplates>
-  <hstRoot>/hst:createlandingpage</hstRoot>
-  <projectNamespace>createlandingpage</projectNamespace>
-  <repositoryDataModule>repository-data</repositoryDataModule>
-  <selectedBeansPackage>org.onehippo.beans</selectedBeansPackage>
-  <selectedComponentsPackage>org.onehippo.components</selectedComponentsPackage>
-  <selectedProjectPackage>org.onehippo</selectedProjectPackage>
-  <selectedRestPackage>org.onehippo.rest</selectedRestPackage>
-  <setupDone>true</setupDone>
-  <siteContextPath>/site</siteContextPath>
-  <siteModule>site</siteModule>
-  <useSamples>true</useSamples>
-  <webfileBundleName>site</webfileBundleName>
-  <webfilesSubModule>webfiles</webfilesSubModule>
+    <applicationSubModule>application</applicationSubModule>
+    <cmsDependenciesModule>cms-dependencies</cmsDependenciesModule>
+    <cmsModule>cms</cmsModule>
+    <confirmParams>false</confirmParams>
+    <developmentSubModule>development</developmentSubModule>
+    <enterprise>false</enterprise>
+    <extraTemplates>true</extraTemplates>
+    <hstRoot>/hst:createlandingpage</hstRoot>
+    <projectNamespace>createlandingpage</projectNamespace>
+    <repositoryDataModule>repository-data</repositoryDataModule>
+    <selectedBeansPackage>org.onehippo.beans</selectedBeansPackage>
+    <selectedComponentsPackage>org.onehippo.components</selectedComponentsPackage>
+    <selectedProjectPackage>org.onehippo</selectedProjectPackage>
+    <selectedRestPackage>org.onehippo.rest</selectedRestPackage>
+    <setupDone>true</setupDone>
+    <siteContextPath>/site</siteContextPath>
+    <siteModule>site</siteModule>
+    <useSamples>true</useSamples>
+    <webfileBundleName>site</webfileBundleName>
+    <webfilesSubModule>webfiles</webfilesSubModule>
 </project>
