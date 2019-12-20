@@ -50,6 +50,7 @@ import org.hippoecm.hst.pagecomposer.jaxrs.model.SiteMapPagesRepresentation;
 import org.hippoecm.hst.pagecomposer.jaxrs.model.treepicker.AbstractTreePickerRepresentation;
 import org.hippoecm.hst.pagecomposer.jaxrs.model.treepicker.SiteMapTreePickerRepresentation;
 import org.hippoecm.hst.pagecomposer.jaxrs.services.exceptions.ClientError;
+import org.hippoecm.hst.pagecomposer.jaxrs.services.exceptions.ClientException;
 import org.hippoecm.hst.pagecomposer.jaxrs.services.helpers.SiteMapHelper;
 import org.hippoecm.hst.pagecomposer.jaxrs.services.validators.NotNullValidator;
 import org.hippoecm.hst.pagecomposer.jaxrs.services.validators.Validator;
@@ -286,20 +287,19 @@ public class SiteMapResource extends AbstractConfigResource {
             @HeaderParam("targetName") final String targetName) {
 
         HstSiteMapItem siteMapItem = siteMapHelper.getConfigObject(siteMapItemUUID);
-        String targetRelativeContentPath = StringUtils.removeEnd(targetName, ".html");
 
-        HstSiteMap siteMap = siteMapItem.getHstSiteMap();
-
-
-//        final ValidatorBuilder preValidators = ValidatorBuilder.builder()
-//                .add(validatorFactory.getNotNullValidator(targetName,
-//                        ClientError.INVALID_NAME, "Name of the copied page is not allowed to be null"))
-//                .add(validatorFactory.getHasPreviewConfigurationValidator(getPageComposerContextService()))
-//                .add(validatorFactory.getNodePathPrefixValidator(getPreviewConfigurationPath(), getPageComposerContextService().getRequestConfigIdentifier(),
-//                        HstNodeTypes.NODETYPE_HST_SITEMAP))
-//                .add(validatorFactory.getNameValidator(targetName))
-//                .add(validatorFactory.getNamePathInfoValidator(getPageComposerContextService(), targetName))
-//                .add(validatorFactory.getConfigurationExistsValidator(siteMapItemUUID, siteMapHelper));
+        final ValidatorBuilder preValidators = ValidatorBuilder.builder()
+                .add(validatorFactory.getNotNullValidator(targetName,
+                        ClientError.INVALID_NAME, "Name of the copied page is not allowed to be null"))
+                .add(validatorFactory.getHasPreviewConfigurationValidator(getPageComposerContextService()))
+                .add(validatorFactory.getNodePathPrefixValidator(getPreviewConfigurationPath(), getPageComposerContextService().getRequestConfigIdentifier(),
+                        HstNodeTypes.NODETYPE_HST_SITEMAP))
+                .add(validatorFactory.getNamePathInfoValidator(getPageComposerContextService(), targetName))
+                .add(requestContext -> {
+                    if (!siteMapItem.containsAny() && !siteMapItem.containsWildCard()) {
+                        throw new ClientException("Current page is not wildcard", ClientError.INVALID_PATH_INFO);
+                    }
+                });
 
         return tryExecute(() -> {
             PageCopyContextImpl pcc = siteMapHelper.detach(null, siteMapItemUUID, null, targetName);
@@ -307,7 +307,7 @@ public class SiteMapResource extends AbstractConfigResource {
             publishSynchronousEvent(event);
             final SiteMapPageRepresentation siteMapPageRepresentation = createSiteMapPageRepresentation(pcc.getTargetMount(), pcc.getNewSiteMapItemNode().getIdentifier(), null);
             return ok("Item created successfully", siteMapPageRepresentation);
-        }, ValidatorBuilder.builder().build());
+        }, preValidators.build());
     }
 
 
